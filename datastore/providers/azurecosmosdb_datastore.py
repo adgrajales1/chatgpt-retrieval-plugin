@@ -27,8 +27,6 @@ AZCOSMOS_API = os.environ.get("AZCOSMOS_API", "mongo-vcore")
 AZCOSMOS_CONNSTR = os.environ.get("AZCOSMOS_CONNSTR")
 AZCOSMOS_DATABASE_NAME = os.environ.get("AZCOSMOS_DATABASE_NAME")
 AZCOSMOS_CONTAINER_NAME = os.environ.get("AZCOSMOS_CONTAINER_NAME")
-AZCOSMOS_SIMILARITY = os.environ.get("AZCOSMOS_SIMILARITY", "COS")
-AZCOSMOS_NUM_LISTS = os.environ.get("AZCOSMOS_NUM_LISTS", 100)
 assert AZCOSMOS_API is not None
 assert AZCOSMOS_CONNSTR is not None
 assert AZCOSMOS_DATABASE_NAME is not None
@@ -203,7 +201,7 @@ class AzureCosmosDBDataStore(DataStore):
                       
     """
     @staticmethod
-    async def create(num_lists: int=AZCOSMOS_NUM_LISTS, similarity: str=AZCOSMOS_SIMILARITY) -> DataStore:
+    async def create(num_lists, similarity) -> DataStore:
 
         # Create underlying data store based on the API definition.
         # Right now this only supports Mongo, but set up to support more.
@@ -213,11 +211,6 @@ class AzureCosmosDBDataStore(DataStore):
             apiStore = MongoStoreApi(mongoClient)
         else:
             raise NotImplementedError
-        if similarity not in ["COS", "L2", "IP"]:
-            raise ValueError(
-                f"Similarity {similarity} is not supported."
-                "Supported similarity metrics are COS, L2, and IP."
-            )
 
         await apiStore.ensure(num_lists, similarity)
         store = AzureCosmosDBDataStore(apiStore)
